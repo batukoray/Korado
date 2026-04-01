@@ -9,9 +9,9 @@ import re
 import sys
 from dataclasses import dataclass, field
 import shutil
-import itertools
 import tty
 import termios
+import random
 
 try:
     import pulp
@@ -32,12 +32,14 @@ BLACK      = '\033[30m'
 DARK_GRAY  = '\033[90m'
 LIGHT_GRAY = '\033[37m'
 RESET      = '\033[0m'
+BOLD  = '\033[1m'
+RESET = '\033[0m'
 
 def neon_text(text, n=0):
     return ''.join(f"{neon_colors[(j+n) % len(neon_colors)]}{char}" for j, char in enumerate(text)) + '\033[0m'
 
 print('\n')
-for i, line in enumerate([
+logo_lines = [
     '88      a8P                                            88              ',
     "88    ,88'                                             88              ",
     '88  ,88"                                               88              ',
@@ -46,12 +48,18 @@ for i, line in enumerate([
     '88P   Y8b   8b       d8 88         ,adPPPPP88 8b       88 8b       d8  ',
     '88     "88, "8a,   ,a8" 88         88,    ,88 "8a,   ,d88 "8a,   ,a8"  ',
     '88       Y8b `"YbbdP"\'  88         `"8bbdP"Y8  `"8bbdP"Y8  `"YbbdP"\' ',
-    '',
-    "Batu Koray's Operations Research App for Decision Optimization",
-    '',
-]):
+]
+
+print('\n')
+for i, line in enumerate(logo_lines):
     print(neon_text(line, n=i*7))
 
+print()
+def rc():
+    return random.choice(neon_colors)
+
+print(f"Batu {rc()}{BOLD}K{RESET}oray's {rc()}{BOLD}O{RESET}perations {rc()}{BOLD}R{RESET}esearch {rc()}{BOLD}A{RESET}pp for {rc()}{BOLD}D{RESET}ecision {rc()}{BOLD}O{RESET}ptimization{RESET}")
+print()
 # ── Regex building blocks ───────────────────────────────────────
 
 # LINDO variable: alpha start, then alpha/digit/underscore/dot
