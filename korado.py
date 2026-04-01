@@ -9,6 +9,7 @@ import re
 import sys
 from dataclasses import dataclass, field
 import shutil
+import itertools
 
 try:
     import pulp
@@ -465,11 +466,10 @@ def print_solution(result: SolveResult, model_text: str, title: str | None = Non
             print(f'\n {result.message}')
 
 
-
 # ── Editor helpers ──────────────────────────────────────────────
 
 def _default_lines() -> list[str]:
-    return ['MAX ']
+    return ['']
 
 
 def _safe_add(win, y, x, text, w, attr=0):
@@ -491,15 +491,26 @@ def _has_end_above(lines: list[str], row: int) -> bool:
 
 # ── Curses editor ───────────────────────────────────────────────
 
-def _render(scr, lines, cr, cc, top):
+def _render(scr, lines, cr, cc, top, cursor_attr):
     scr.erase()
     h, w = scr.getmaxyx()
 
     hdr = [
-        'KORADO  |  PuLP / CBC',
-        '\u2191\u2193\u2190\u2192 Navigate  Enter: new row  Ctrl+G: Solve  Ctrl+Q: Quit',
-        '! comments  FREE/GIN/INT/SLB/SUB after END  Non-negativity default',
+        '88      a8P                                            88              ',
+        "88    ,88'                                             88              ",
+        '88  ,88"                                               88              ',
+        "88,d88'      ,adPPYba,  8b,dPPYba, ,adPPYYba,  ,adPPYb,88  ,adPPYba,  ",
+        '8888"88,    a8"     "8a 88P\'   "Y8 ""     `Y8 a8"    `Y88 a8"     "8a ',
+        '88P   Y8b   8b       d8 88         ,adPPPPP88 8b       88 8b       d8  ',
+        '88     "88, "8a,   ,a8" 88         88,    ,88 "8a,   ,d88 "8a,   ,a8"  ',
+        '88       Y8b `"YbbdP"\'  88         `"8bbdP"Y8  `"8bbdP"Y8  `"YbbdP"\'  By: Batu Koray Masak  ',
+        '',
+        'Koray\'s Operations Research App for Decision Optimization',
+        '',
+        '↑↓←→ Navigate    Enter: new row    Ctrl+G: Solve    Ctrl+Q: Quit ! comments    FREE/GIN/INT/SLB/SUB after END    Non-negativity default',
+        ''
     ]
+
     for i, t in enumerate(hdr):
         if i >= h:
             break
@@ -525,9 +536,18 @@ def _render(scr, lines, cr, cc, top):
         txt = lines[li]
         lo = max(0, cc - aw + 1) if li == cr else 0
         ct = txt[lo: lo + aw]
-        la = curses.A_REVERSE if li == cr else 0
-        _safe_add(scr, sy, 0, pf, len(pf), la)
-        _safe_add(scr, sy, len(pf), ct, aw, la)
+
+        is_cur_line = li == cr
+
+        # Render line number
+        _safe_add(scr, sy, 0, pf, len(pf), 0)
+
+        # Render line content
+        if not is_cur_line:
+            _safe_add(scr, sy, len(pf), ct, aw, 0)
+        else:
+            _safe_add(scr, sy, len(pf), ct, aw, 0)
+
 
     try:
         scr.addnstr(h - 1, 0, ' ' * (w - 1), w - 1, curses.A_REVERSE)
@@ -557,6 +577,14 @@ def _edit_curses(initial: list[str] | None = None) -> str | None:
     def session(scr):
         curses.curs_set(1)
         scr.keypad(True)
+
+        # Initialize colors for the custom cursor
+        curses.start_color()
+        curses.use_default_colors()
+        # Pair 1: Black text on a white background (for the cursor)
+        curses.init_pair(1, 135, -1)
+        cursor_attr = curses.color_pair(1)
+
         row, col, top = 0, len(lines[0]) if lines else 0, 0
 
         while True:
@@ -564,7 +592,7 @@ def _edit_curses(initial: list[str] | None = None) -> str | None:
                 lines.append('')
                 row = col = 0
             col = max(0, min(col, len(lines[row])))
-            top = _render(scr, lines, row, col, top)
+            top = _render(scr, lines, row, col, top, cursor_attr)
             key = scr.getch()
 
             # ── Quit / Submit ───────────────────────────────
