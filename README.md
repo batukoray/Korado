@@ -1,5 +1,7 @@
 # Korado, a LINDO-like Linear Optimization Tool
 
+![Korado screenshot](https://raw.githubusercontent.com/batukoray/Korado/refs/heads/main/assets/Korado_Banner.png)
+
 Korado is a CLI tool for linear optimizations that mimics the syntax of LINDO, a popular optimization modeling language. It stands for "**K**oray's **O**perations **R**esearch **A**pp for **D**ecision **O**ptimization". **K**oray is my middle name, and it does sound **cool** in the title, therefore being in it.
 
 The purpose of this tool is to provide a LINDO-like optimization tool for **any** OS. I first started this basic app after I realized that there wasn't a LINDO for MacOS, and the alternative, LINGO, was not user-friendly. I wanted to create a simple, more easily usable and accessible alternative.
@@ -22,6 +24,9 @@ The purpose of this tool is to provide a LINDO-like optimization tool for **any*
 - **Interactive Editor**: Provides a simple, full-screen text editor (powered by `curses`) for composing and editing models directly in the terminal.
 - **Standard Solver Backend**: Uses the robust and widely-used **PuLP** modeling library with the **CBC (COIN-OR Branch and Cut)** solver.
 - **Clear Output**: Presents the solution, including the objective function value, variable values, and binding constraints, in a clean, readable format.
+
+![Korado screenshot](https://github.com/batukoray/Korado/blob/main/assets/Korado_Demo.png)
+
 
 ## Installation
 
