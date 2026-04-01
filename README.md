@@ -48,7 +48,7 @@ The purpose of this tool is to provide a LINDO-like optimization tool for **any*
 Run the script from your terminal:
 
 ```bash
-python3 lindo_pulp_cli.py
+python3 korado.py
 ```
 
 This will launch the interactive editor.
@@ -66,7 +66,7 @@ This will launch the interactive editor.
 The script includes a built-in example. To run it directly, use the `--example` flag:
 
 ```bash
-python3 lindo_pulp_cli.py --example
+python3 korado.py --example
 ```
 
 This will immediately solve the following model and print the solution:
