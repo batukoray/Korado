@@ -10,6 +10,8 @@ import sys
 from dataclasses import dataclass, field
 import shutil
 import itertools
+import tty
+import termios
 
 try:
     import pulp
@@ -24,6 +26,31 @@ EXAMPLE_MODEL_LINES = [
     '2 X1 + 12 X2 >= 24',
     'END',
 ]
+
+neon_colors = ["\033[35m", "\033[95m", "\033[94m", "\033[94m"]
+BLACK      = '\033[30m'
+DARK_GRAY  = '\033[90m'
+LIGHT_GRAY = '\033[37m'
+RESET      = '\033[0m'
+
+def neon_text(text, n=0):
+    return ''.join(f"{neon_colors[(j+n) % len(neon_colors)]}{char}" for j, char in enumerate(text)) + '\033[0m'
+
+print('\n')
+for i, line in enumerate([
+    '88      a8P                                            88              ',
+    "88    ,88'                                             88              ",
+    '88  ,88"                                               88              ',
+    "88,d88'      ,adPPYba,  8b,dPPYba, ,adPPYYba,  ,adPPYb,88  ,adPPYba,  ",
+    '8888"88,    a8"     "8a 88P\'   "Y8 ""     `Y8 a8"    `Y88 a8"     "8a ',
+    '88P   Y8b   8b       d8 88         ,adPPPPP88 8b       88 8b       d8  ',
+    '88     "88, "8a,   ,a8" 88         88,    ,88 "8a,   ,d88 "8a,   ,a8"  ',
+    '88       Y8b `"YbbdP"\'  88         `"8bbdP"Y8  `"8bbdP"Y8  `"YbbdP"\' ',
+    '',
+    "Batu Koray's Operations Research App for Decision Optimization",
+    '',
+]):
+    print(neon_text(line, n=i*7))
 
 # ── Regex building blocks ───────────────────────────────────────
 
@@ -419,7 +446,7 @@ def solve_model(spec: ModelSpec) -> SolveResult:
 
 def print_solution(result: SolveResult, model_text: str, title: str | None = None) -> None:
     width = shutil.get_terminal_size().columns
-    print('—' * width + '\n')
+    print(f'{DARK_GRAY}—{RESET}' * width + '\n')
     if title:
         print(f' TITLE: {title}\n')
 
@@ -432,16 +459,15 @@ def print_solution(result: SolveResult, model_text: str, title: str | None = Non
 
     if result.status == 'Optimal':
         width = shutil.get_terminal_size().columns
-        print('—' * width + '\n')
+        print(f'{DARK_GRAY}—{RESET}' * width + '\n')
         print(' LP OPTIMUM FOUND')
         print('\n OBJECTIVE FUNCTION VALUE\n')
         print(f'   ={_fmt(result.objective_value)}')
         print(f"\n {'VARIABLE':<16} {'VALUE':>14}")
         for vn, val in result.variable_values.items():
             print(f' {vn:<16} {_fmt(val)}')
-        width = shutil.get_terminal_size().columns
-        print('\n' + '—' * width)
-        print('\n BINDING CONSTRAINTS')
+        print(f'{DARK_GRAY}—{RESET}' * width + '\n')
+        print(' BINDING CONSTRAINTS')
         bind = [r for r in result.constraints if r.binding]
         if not bind:
             print(' NONE')
@@ -737,16 +763,42 @@ def _acquire(initial: list[str] | None = None) -> tuple[ModelSpec, str] | None:
 
 
 def _prompt() -> str:
+    if not sys.stdin.isatty():  # Fallback for non-interactive sessions
+        while True:
+            try:
+                a = input('\n[Enter] New model  |  [E] Edit this model  |  [Q] Quit: ').strip().upper()
+            except EOFError:
+                return 'quit'
+            if not a:
+                return 'new'
+            if a in {'E', 'EDIT'}:
+                return 'edit'
+            if a in {'Q', 'QUIT', 'EXIT'}:
+                return 'quit'
+
+    prompt_text = '[Enter] New model  |  [E] Edit this model  |  [Q] Quit: '
+    print(f'\n{prompt_text}', end='', flush=True)
+
     while True:
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
         try:
-            a = input('\n[Enter] New model  |  [E] Edit this model  |  [Q] Quit: ').strip().upper()
-        except EOFError:
-            return 'quit'
-        if not a:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+        # ANSI escape code to move cursor up one line and clear the line
+        clear_line = '\x1b[1A\x1b[2K'
+
+        if ch in ('\r', '\n'):
+            print(clear_line, end='', flush=True)
             return 'new'
-        if a in {'E', 'EDIT'}:
+        elif ch.upper() == 'E':
+            print(f'E\n{clear_line}', end='', flush=True)
             return 'edit'
-        if a in {'Q', 'QUIT', 'EXIT'}:
+        elif ch.upper() == 'Q':
+            print(f'Q\n{clear_line}', end='', flush=True)
             return 'quit'
 
 
