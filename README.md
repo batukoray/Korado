@@ -1,4 +1,4 @@
-![Korado screenshot](https://raw.githubusercontent.com/batukoray/Korado/refs/heads/main/assets/Korado_Banner.png)
+![Korado screenshot](https://raw.githubusercontent.com/batukoray/Korado/819b18425d1b0012af67738c40a3403b5bc2f5d9/assets/Korado_Banner.png)
 
 Korado is a CLI application for linear optimizations that mimics the syntax of LINDO, a popular optimization modeling language. Korado stands for "**K**oray's **O**perations **R**esearch **A**pp for **D**ecision **O**ptimization". **K**oray is my middle name, and it does sound **cool** in the title, therefore being in it.
 
