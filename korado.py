@@ -31,6 +31,8 @@ neon_colors = ["\033[35m", "\033[95m", "\033[94m", "\033[94m"]
 BLACK      = '\033[30m'
 DARK_GRAY  = '\033[90m'
 LIGHT_GRAY = '\033[37m'
+RED        = '\033[31m'
+GOLD       = '\033[38;5;220m'
 RESET      = '\033[0m'
 BOLD  = '\033[1m'
 RESET = '\033[0m'
@@ -762,9 +764,9 @@ def _acquire(initial: list[str] | None = None) -> tuple[ModelSpec, str] | None:
         try:
             return parse_model_text(text), text
         except ModelParseError as e:
-            print(f'\nINPUT ERROR: {e}')
+            print(f'\n{RED}INPUT ERROR: {e}{RESET}')
             try:
-                input('Press Enter to continue editing...')
+                input(f'Press {BOLD}Enter{RESET} to continue editing...')
             except EOFError:
                 return None
             cur = text.splitlines() if text.strip() else _default_lines()
